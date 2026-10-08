@@ -91,17 +91,17 @@ def public_data(value):
     return value
 
 
-def media_urls(value):
+def media_urls(value, keys=MEDIA_KEYS):
     result = []
     if isinstance(value, dict):
         for key, item in value.items():
-            if key in MEDIA_KEYS and https_url(item):
+            if key in keys and https_url(item):
                 result.append(item)
             elif isinstance(item, (dict, list)):
-                result.extend(media_urls(item))
+                result.extend(media_urls(item, keys))
     elif isinstance(value, list):
         for item in value:
-            result.extend(media_urls(item))
+            result.extend(media_urls(item, keys))
     return list(dict.fromkeys(result))
 
 
@@ -232,6 +232,10 @@ class MediaClient:
         return self.check_media(result)
 
     def check_media(self, result):
+        if self.spec.get('task_path') and result['status'] == 'succeeded':
+            kind = self.spec.get('kind', 'image')
+            keys = {'audio_url', 'url'} if kind == 'audio' else {'video_url', 'url'} if kind == 'video' else {'image_url', 'raw_image_url', 'url'}
+            result['media_urls'] = media_urls(result.get('data', {}), keys)
         if self.spec.get('task_path') and result['status'] == 'succeeded' and not result['media_urls']:
             result.update(status='failed', success=False, error={'code': 'missing_media', 'message': 'The task finished without a media URL. Inspect this task ID before any resubmission.'})
         return result

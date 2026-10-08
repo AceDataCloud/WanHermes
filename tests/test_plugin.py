@@ -112,6 +112,11 @@ class ContractTests(unittest.TestCase):
         with patch('client.request',return_value={'success':True}):
             with self.assertRaises(client.ApiError):client.MediaClient(SPEC).generate(args)
 
+    def test_audio_links_exclude_cover_and_unrendered_video(self):
+        r={'status':'succeeded','success':True,'media_urls':[], 'data':{'data':[{'audio_url':'https://example.com/a.mp3','image_url':'https://example.com/cover.jpg','video_url':'https://example.com/not-rendered.mp4'}]}}
+        r=client.MediaClient({**SPEC,'task_path':'/x/tasks','kind':'audio'}).check_media(r)
+        self.assertEqual(r['media_urls'],['https://example.com/a.mp3'])
+
     def test_declared_defaults_and_request(self):
         args={}
         for k in SPEC['generate_schema']['required']:
