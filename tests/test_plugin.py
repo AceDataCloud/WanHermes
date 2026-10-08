@@ -89,12 +89,29 @@ class ContractTests(unittest.TestCase):
         r=client.MediaClient({**SPEC,'task_path':'/x/tasks'}).check_media({'status':'succeeded','success':True,'media_urls':[]})
         self.assertFalse(r['success'])
 
+    def test_nested_video_task_contract(self):
+        r=client.normalize({'task':{'id':'t','status':'succeeded','content':{'url':'https://example.com/v.mp4'}}})
+        self.assertEqual(r['status'],'succeeded')
+        self.assertEqual(r['task_id'],'t')
+        self.assertEqual(r['media_urls'],['https://example.com/v.mp4'])
+
+    def test_single_url_validation(self):
+        schema={'properties':{'image_url':{'type':'string','format':'uri'}}}
+        for v in ['http://example.com/x','/tmp/x','https://u:p@example.com']:
+            with self.assertRaises(ValueError):client.validate({'image_url':v},schema)
+
+    def test_sync_contract_does_not_claim_empty_envelope(self):
+        if SPEC['service'] not in {'google-search','face'}:self.skipTest('asynchronous service')
+        args={k:'https://example.com/portrait.jpg' if k=='image_url' else 'test' for k in SPEC['generate_schema']['required']}
+        with patch('client.request',return_value={'success':True}):
+            with self.assertRaises(client.ApiError):client.MediaClient(SPEC).generate(args)
+
     def test_declared_defaults_and_request(self):
         args={}
         for k in SPEC['generate_schema']['required']:
             args[k]='https://example.com/image.jpg' if k.endswith('_url') else 'test'
         if SPEC['service']=='suno':args={'prompt':'A short instrumental melody'}
-        with patch('client.request',return_value={'task_id':'t'} if SPEC.get('task_path') else {'success':True,'data':{'text':'ok'}}) as req:
+        with patch('client.request',return_value={'task_id':'t'} if SPEC.get('task_path') else {'success':True,'data':{'organic':[],'face_shape_set':[],'image_width':10,'image_height':10}}) as req:
             client.MediaClient(SPEC).generate(args)
         path,body=req.call_args.args
         self.assertEqual(path,SPEC['generate_path'])

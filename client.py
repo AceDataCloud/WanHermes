@@ -18,6 +18,7 @@ DONE = {'complete', 'completed', 'succeeded', 'succeed', 'success', 'finished'}
 FAILED = {'failed', 'error', 'cancelled', 'canceled', 'rejected'}
 MEDIA_KEYS = {'image_url', 'audio_url', 'video_url', 'file_url', 'raw_image_url', 'url'}
 OUTPUT_KEYS = MEDIA_KEYS | {'id', 'task_id', 'state', 'status', 'title', 'duration', 'width', 'height', 'format', 'model', 'lyric', 'text', 'data', 'content', 'success', 'images', 'videos', 'audios', 'items', 'organic', 'news', 'places', 'maps', 'link', 'snippet', 'position', 'date', 'source', 'imageUrl', 'thumbnailUrl', 'imageWidth', 'imageHeight', 'address', 'rating', 'ratingCount', 'latitude', 'longitude', 'face_model_version', 'face_shape_set', 'image_height', 'image_width', 'face_profile', 'left_eye', 'right_eye', 'left_eyebrow', 'right_eyebrow', 'mouth', 'nose', 'left_pupil', 'right_pupil', 'x', 'y'}
+OUTPUT_KEYS |= {'task', 'image_id', 'progress', 'raw_image_height', 'raw_image_width', 'resolution', 'ratio'}
 
 
 class ApiError(Exception):
@@ -107,7 +108,8 @@ def media_urls(value):
 def normalize(body, task_id='', *, retrieved=False, synchronous=False):
     if not isinstance(body, dict):
         raise ApiError('invalid_response', 'Expected a task or generation object; check request history.')
-    resolved_id = str(task_id or body.get('task_id') or (body.get('id') if not synchronous else '') or '')
+    nested_id = body.get('task', {}).get('id') if isinstance(body.get('task'), dict) else ''
+    resolved_id = str(task_id or body.get('task_id') or nested_id or (body.get('id') if not synchronous else '') or '')
     result = body.get('response') if retrieved and 'response' in body else body
     if isinstance(result, str):
         try:
@@ -217,6 +219,11 @@ class MediaClient:
             if body.get('first_frame_url'):
                 body['content'].append({'type': 'image_url', 'image_url': {'url': body.pop('first_frame_url')}, 'role': 'first_frame'})
         result = normalize(request(self.spec['generate_path'], body, headers=headers), synchronous=not self.spec.get('task_path'))
+        if result['status'] == 'succeeded' and self.spec['service'] in {'google-search', 'face'}:
+            data = result['data'].get('data', result['data'])
+            expected = {'organic', 'news'} if self.spec['service'] == 'google-search' else {'face_shape_set', 'image_width', 'image_height'}
+            if not isinstance(data, dict) or not expected.intersection(data):
+                raise ApiError('invalid_response', 'The synchronous response is missing its documented result fields. Check the request trace before retrying.')
         return self.check_media(result)
 
     def check_media(self, result):
