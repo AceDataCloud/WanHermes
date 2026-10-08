@@ -1,0 +1,15 @@
+name: Validate Hermes plugin
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Unit contracts (no paid requests)
+        run: python3 -m unittest discover -s tests -v
+      - uses: NousResearch/hermes-agent/.github/actions/plugin-validate@818c13be1dc4fd28987e1e881a9408224afd4535
+        with:
+          path: ${{ github.workspace }}
+          hermes-ref: '818c13be1dc4fd28987e1e881a9408224afd4535'

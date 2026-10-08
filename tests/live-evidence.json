@@ -1,0 +1,35 @@
+{
+  "hermes_version": "0.21.6",
+  "hermes_sha": "818c13be1dc4fd28987e1e881a9408224afd4535",
+  "tested_at": "2026-10-08T17:53:44.621152+00:00",
+  "operation": "acedata_wan_generate",
+  "invocation": "Hermes registered tool dispatcher",
+  "generation_attempts": 1,
+  "status": "succeeded",
+  "task_id": "83d25309-01f3-4f1f-9fa5-aac0ddce39fb",
+  "media_verification": [
+    {
+      "url": "https://storage.fonedis.cc/1d/0e/20261009/fe14e3a8/51759680-metadata_2fe18e480c5310c3.mp4?Expires=1791568550&OSSAccessKeyId=LTAI5tJjG6wsHad1Sf7iezX4&Signature=MBN9WS0zDw2OJqRgboDxoUO3JtU%3D",
+      "content_type": "video/mp4",
+      "bytes": 1905137,
+      "sha256": "19792c7ae7cd94df6a9114cd1398c6392ca59fbdf4af628dbef9f80ce1de02d4",
+      "duration": "5.007007",
+      "streams": [
+        {
+          "codec_type": "video",
+          "codec_name": "h264",
+          "width": 1920,
+          "height": 1080
+        },
+        {
+          "codec_type": "audio",
+          "codec_name": "aac",
+          "sample_rate": "44100"
+        }
+      ],
+      "decoded": true
+    }
+  ],
+  "runtime_client_sha256": "662dd5d6d48c53dbf0ea527732080c37fde0d7dfdcc16fa93b7bd81cafca91db",
+  "limitations": "Primary operation only. Other options are schema-validated but not all combinations were sent to the paid API. Catalog distribution is a separate verification step."
+}

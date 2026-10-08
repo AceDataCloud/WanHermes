@@ -1,0 +1,14 @@
+{
+  "name": "acedatacloud-wan",
+  "version": "1.0.0",
+  "description": "Wan 2.6 text-to-video generation through your Ace Data Cloud account.",
+  "author": "AceDataCloud",
+  "requires_hermes": ">=0.21.6",
+  "provides_tools": [
+    "acedata_wan_generate",
+    "acedata_wan_task"
+  ],
+  "requires_env": [
+    "ACEDATACLOUD_API_KEY"
+  ]
+}
