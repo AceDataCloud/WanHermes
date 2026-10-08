@@ -83,11 +83,11 @@ def https_url(value):
         return False
 
 
-def public_data(value):
+def public_data(value, keys=OUTPUT_KEYS):
     if isinstance(value, dict):
-        return {key: public_data(item) for key, item in value.items() if key in OUTPUT_KEYS}
+        return {key: public_data(item, keys) for key, item in value.items() if key in keys}
     if isinstance(value, list):
-        return [public_data(item) for item in value]
+        return [public_data(item, keys) for item in value]
     return value
 
 
@@ -234,6 +234,8 @@ class MediaClient:
     def check_media(self, result):
         if self.spec.get('task_path') and result['status'] == 'succeeded':
             kind = self.spec.get('kind', 'image')
+            if kind == 'audio':
+                result['data'] = public_data(result.get('data', {}), OUTPUT_KEYS - {'video_url', 'image_url', 'raw_image_url'})
             keys = {'audio_url', 'url'} if kind == 'audio' else {'video_url', 'url'} if kind == 'video' else {'image_url', 'raw_image_url', 'url'}
             result['media_urls'] = media_urls(result.get('data', {}), keys)
         if self.spec.get('task_path') and result['status'] == 'succeeded' and not result['media_urls']:

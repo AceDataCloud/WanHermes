@@ -116,6 +116,8 @@ class ContractTests(unittest.TestCase):
         r={'status':'succeeded','success':True,'media_urls':[], 'data':{'data':[{'audio_url':'https://example.com/a.mp3','image_url':'https://example.com/cover.jpg','video_url':'https://example.com/not-rendered.mp4'}]}}
         r=client.MediaClient({**SPEC,'task_path':'/x/tasks','kind':'audio'}).check_media(r)
         self.assertEqual(r['media_urls'],['https://example.com/a.mp3'])
+        self.assertNotIn('video_url',json.dumps(r))
+        self.assertNotIn('cover.jpg',json.dumps(r))
 
     def test_declared_defaults_and_request(self):
         args={}
