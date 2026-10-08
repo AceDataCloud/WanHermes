@@ -31,5 +31,5 @@
     }
   ],
   "runtime_client_sha256": "662dd5d6d48c53dbf0ea527732080c37fde0d7dfdcc16fa93b7bd81cafca91db",
-  "limitations": "Primary operation only. Other options are schema-validated but not all combinations were sent to the paid API. Catalog publication remains pending."
+  "limitations": "Primary operation only. Other options are schema-validated but not all combinations were sent to the paid API. Catalog distribution is a separate verification step."
 }
