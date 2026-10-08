@@ -133,7 +133,8 @@ def normalize(body, task_id='', *, retrieved=False, synchronous=False):
                 visit(item)
 
     visit(result)
-    if body.get('error') or body.get('success') is False:
+    outer_failed = bool(body.get('error') or body.get('success') is False)
+    if outer_failed:
         failures.append(True)
     failed = bool(failures or any(state in FAILED for state in states))
     unfinished = retrieved and 'finished_at' in body and body['finished_at'] is None
@@ -141,10 +142,14 @@ def normalize(body, task_id='', *, retrieved=False, synchronous=False):
     urls = media_urls(safe)
     done = (synchronous and bool(result)) or (bool(states) and all(state in DONE for state in states)) or (
         not states and bool(urls) and (not retrieved or bool(body.get('finished_at'))))
-    if failed:
+    if outer_failed:
         status = 'failed'
     elif unfinished:
+        # Task responses can contain an intermediate failed attempt while the
+        # server is still processing. Only finished_at makes that response final.
         status = 'pending'
+    elif failed:
+        status = 'failed'
     elif done:
         status = 'succeeded'
     elif resolved_id:

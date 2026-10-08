@@ -28,6 +28,12 @@ class ContractTests(unittest.TestCase):
         r = client.normalize({'task_id': 't', 'data': [{'state':'complete','audio_url':'https://example.com/a.mp3'}, {'state':'running','audio_url':'https://example.com/b.mp3'}]})
         self.assertEqual(r['status'], 'pending')
 
+    def test_unfinished_response_error_is_not_terminal_failure(self):
+        r=client.normalize({'finished_at':None,'response':{'success':False,'error':{'code':'processing'}}},'t',retrieved=True)
+        self.assertEqual(r['status'],'pending')
+        final=client.normalize({'finished_at':123,'response':{'success':False,'error':{'code':'failed'}}},'t',retrieved=True)
+        self.assertEqual(final['status'],'failed')
+
     def test_terminal_task_unwraps_json(self):
         r = client.normalize({'response': json.dumps({'success':True, 'data':[{'state':'complete','audio_url':'https://example.com/a.mp3'}]}), 'finished_at':'2026-10-09T00:00:00Z'}, 't', retrieved=True)
         self.assertEqual(r['status'], 'succeeded')
