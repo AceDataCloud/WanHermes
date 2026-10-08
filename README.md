@@ -50,7 +50,7 @@ python -m unittest discover -s tests -v
 hermes plugins validate . --install-deps
 ```
 
-CI validates this standalone repository on the official Hermes 0.21.6 source with its own locked runtime. Unit tests use synthetic responses and make no paid calls. Integration evidence is recorded separately when run; passing CI alone is not proof of a live generation or official listing.
+CI validates this standalone repository on the official Hermes 0.21.6 source with its own locked runtime. Unit tests use synthetic responses and make no paid calls. [Real primary-operation evidence](tests/live-evidence.json) records the isolated stable-runtime call and verified result. Passing CI alone is not proof of a live generation or official listing.
 
 The bundled transport is shared Ace Data Cloud code copied into this repository so installation needs no sibling checkout or unpublished package. No third-party Python dependencies are added. Asset `assets/logo.png` is the unmodified [official source](https://cdn.acedata.cloud/assets/logo.png), SHA-256 `3e2c6e2d1a61a549dae2374ec4444c77f4c2617c8f3772bdd4cd6e52bf20767e`; `catalog.png` contains that complete logo on a transparent 1200×600 canvas.
 
