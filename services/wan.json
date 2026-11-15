@@ -1,0 +1,81 @@
+{
+  "service": "wan",
+  "title": "Ace Data Cloud Wan",
+  "kind": "video",
+  "description": "Wan 2.6 text-to-video generation through your Ace Data Cloud account.",
+  "tool_prefix": "acedatacloud_single_wan",
+  "generate_path": "/wan/videos",
+  "task_path": "/wan/tasks",
+  "defaults": {
+    "model": "wan2.6-t2v",
+    "action": "text2video",
+    "duration": 5,
+    "resolution": "720P"
+  },
+  "generate_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "prompt"
+    ],
+    "properties": {
+      "prompt": {
+        "type": "string",
+        "maxLength": 4000
+      },
+      "resolution": {
+        "type": "string",
+        "enum": [
+          "720P",
+          "1080P"
+        ],
+        "maxLength": 4000
+      },
+      "negative_prompt": {
+        "type": "string",
+        "maxLength": 4000
+      },
+      "model": {
+        "type": "string",
+        "enum": [
+          "wan2.6-t2v"
+        ],
+        "maxLength": 4000
+      },
+      "duration": {
+        "type": "integer",
+        "enum": [
+          5,
+          10,
+          15
+        ]
+      }
+    }
+  },
+  "task_schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "task_id"
+    ],
+    "properties": {
+      "task_id": {
+        "type": "string",
+        "maxLength": 128,
+        "pattern": "[A-Za-z0-9_-]+"
+      },
+      "wait_seconds": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 60
+      }
+    }
+  },
+  "generate_name": "acedatacloud_single_wan_generate",
+  "tools": [
+    "acedatacloud_single_wan_generate",
+    "acedatacloud_single_wan_task"
+  ],
+  "toolset": "acedatacloud-single-wan",
+  "repo": "WanHermes"
+}

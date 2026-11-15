@@ -1,4 +1,4 @@
-"""Shared Ace Data Cloud transport, compiled unchanged into each installable plugin.
+"""Shared transport and task recovery for the Ace Data Cloud media plugin.
 
 The public Dify adapters informed the async contract. Hermes handlers deliberately
 use a bounded poll and a compact allowlisted result, never replay a submission.
@@ -74,10 +74,11 @@ def request(path, body, *, headers=None, timeout=30):
 
 
 def https_url(value):
-    if not isinstance(value, str):
+    if not isinstance(value, str) or any(char.isspace() or ord(char) < 32 for char in value):
         return False
     try:
         parsed = urlsplit(value)
+        _ = parsed.port  # Reject malformed ports instead of sending a billable invalid input.
         return parsed.scheme == 'https' and bool(parsed.hostname) and not parsed.username and not parsed.password and not parsed.fragment
     except ValueError:
         return False
@@ -190,8 +191,11 @@ def validate(args, schema):
         if kind == 'integer' and not field.get('minimum', 0) <= value <= field.get('maximum', 10000):
             raise ValueError(f'{name} is outside the allowed range.')
         if kind == 'array':
-            if not field.get('minItems', 0) <= len(value) <= field.get('maxItems', 4) or not all(https_url(item) for item in value):
+            if not field.get('minItems', 0) <= len(value) <= field.get('maxItems', 4):
                 raise ValueError(f'{name} must contain the allowed number of HTTPS media URLs.')
+            item_schema = {'properties': {'url': field['items']}, 'required': ['url']}
+            for item in value:
+                validate({'url': item}, item_schema)
 
 
 class MediaClient:

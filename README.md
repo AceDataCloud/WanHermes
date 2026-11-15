@@ -1,57 +1,88 @@
-# Ace Data Cloud Wan for Hermes
+# Wan by Ace Data Cloud for Hermes
 
-![Ace Data Cloud](assets/catalog.png)
+[简体中文](readme/README_zh_Hans.md)
 
 Wan 2.6 text-to-video generation through your Ace Data Cloud account.
 
-## Install and configure
+A source-only single-service Git installation: **only Wan's 2 tool(s)**
+are registered. Maintained by Ace Data Cloud; no affiliation with the service maker
+is implied. Requires Hermes **0.23.1+**. You can also select this service
+within the official **Ace Data Cloud Media** package.
 
-Requires Hermes **0.21.6 or newer** and an Ace Data Cloud API key with access to this service and sufficient Credits.
-
-Install a reviewed version from this repository using its full 40-character commit SHA:
-
-```sh
-hermes plugins install https://github.com/AceDataCloud/WanHermes --ref <reviewed-40-character-SHA>
-hermes config set ACEDATACLOUD_API_KEY '<your-api-key>'
-```
-
-Obtain a key and check current service pricing at [Ace Data Cloud](https://platform.acedata.cloud). Enter the key only into your active Hermes profile; never put it into a chat prompt. Enable this plugin's toolset in `hermes tools` and start a new session. When this plugin is available in the official Hermes catalog, you can also install it with `hermes plugins install acedatacloud-wan`.
-
-## Use
-
-Available tools:
-
-- `acedata_wan_generate`
-- `acedata_wan_task`
-
-Example arguments for `acedata_wan_generate`:
-
-```json
-{
-  "prompt": "A teal paper cube on a cream background."
-}
-```
-
-The supported input schema and defaults are in [spec.json](spec.json). This initial release covers the primary operation described above; other operations in the broader Ace API/Dify integration are not implied. Unsupported arguments are rejected before a network call. No automatic model fallback is used.
-
-Generation submits once with `async: true`. Save the returned `task_id`. Query `acedata_wan_task` with `{"task_id":"...","wait_seconds":60}` until `status` is `succeeded` or `failed`. A pending response is not success; media is exposed only after completion. Query failures retain the same task ID. There is no automatic resubmission, background poller or webhook. A generation timeout can mean the request was accepted: recover its ID from your Ace request history before doing anything that might charge again.
-
-## Privacy, billing and permissions
-
-- Sends only the requested inputs to `/wan/videos` and task queries to `/wan/tasks` at **https://api.acedata.cloud**, authenticated by **ACEDATACLOUD_API_KEY**. Inputs may be processed by the service. Generation/search/analysis uses your paid Ace account; consult current pricing before invoking.
-- Reference URLs are sent to the API for processing. The plugin does not read local media or download returned media; results contain HTTPS links. It never forwards your key to returned media URLs or across origin redirects.
-- Reads the declared key at call time through Hermes scoped secrets. No credential files, sibling plugins, OAuth stores, telemetry, shell commands, background processes, auto-updaters or core overrides.
-- JSON results use an allowlist of public output fields; errors omit raw service payloads. It stores no credentials, prompts or generated output on disk. Hermes itself can store tool messages in session history.
-
-## Validation and development
+## Install this service from Git
 
 ```sh
-python -m unittest discover -s tests -v
-hermes plugins validate . --install-deps
+hermes plugins install https://github.com/AceDataCloud/WanHermes --enable
+hermes config set ACEDATACLOUD_API_KEY '<your-application-api-key>'
+hermes tools enable acedatacloud-single-wan
+hermes tools list
 ```
 
-CI validates this standalone repository on the official Hermes 0.21.6 source with its own locked runtime. Unit tests use synthetic responses and make no paid calls. [Real primary-operation evidence](tests/live-evidence.json) records the isolated stable-runtime call and verified result. Passing CI alone is not proof of a live generation or official listing.
+This installs the repository's current default branch. For a reproducible install
+or rollback, add `--ref <40-character-source-SHA>` using the merged commit in its
+history, then start a new session. CI tests normal Git installation at the exact
+source SHA. No PyPI package, default preinstallation or independent official
+catalog entry is claimed.
 
-The bundled transport is shared Ace Data Cloud code copied into this repository so installation needs no sibling checkout or unpublished package. No third-party Python dependencies are added. Asset `assets/logo.png` is the unmodified [official source](https://cdn.acedata.cloud/assets/logo.png), SHA-256 `3e2c6e2d1a61a549dae2374ec4444c77f4c2617c8f3772bdd4cd6e52bf20767e`; `catalog.png` contains that complete logo on a transparent 1200×600 canvas.
+For the reviewed official distribution, open
+[Ace Data Cloud Media](https://hermes-agent.nousresearch.com/docs/plugins/acedatacloud-media)
+and install `acedatacloud-media`; its service toolsets are independently selectable.
+The [one-product-line rule](https://github.com/NousResearch/hermes-agent/pull/135239#issuecomment-6096145033)
+continues to apply. This repository's service name and tool names identify its
+source Git route; do not use a bare service name expecting a separate catalog entry.
 
-AI-assisted implementation by Ace Data Cloud; reviewed and tested as described in the pull request. MIT licensed.
+## Application API key and spending
+
+1. Open [Ace Data Cloud → Applications](https://platform.acedata.cloud/console/applications?utm_source=opensource&utm_medium=referral&utm_campaign=evergreen&utm_content=wanhermes_readme_api_key); sign in or register.
+2. Initialize **General application** if needed, or use a dedicated application
+   with access to this service. Open **Keys / Manage Keys → Create** and name a
+   separately revocable key for Hermes.
+3. Review expiration, usage limits and Allowed APIs. Copy the raw token without
+   `Bearer ` into the active Hermes profile. A `platform-...` management token
+   cannot replace an application API key. Keep it out of prompts and Git.
+4. Check [current pricing and balance](https://platform.acedata.cloud/models?utm_source=opensource&utm_medium=referral&utm_campaign=evergreen&utm_content=wanhermes_readme_pricing) before any call. Trial allowance
+   is whatever the account currently displays; installing is not free usage.
+
+![Applications API key guide, sourced from existing Ace documentation](https://raw.githubusercontent.com/AceDataCloud/NanoBananaDify/2522b2f57210597af2db866445319334a1677a23/_assets/tutorial/get-api-key-en.png)
+
+**The primary operation spends paid Credits without a Hermes approval prompt.** The
+model may choose costly model/resolution/count options where the service supports
+them. Prompts and reference URLs go to **api.acedata.cloud**. Enabling tools permits
+their use with your key; schema constraints are not a spending budget. There is
+**no automatic retry** of a paid request. On timeout or unknown delivery, check
+request history before taking another action. Recover pending work with the same task ID; task lookup never creates a generation.
+
+## Tools, migration and co-installation
+
+- Primary operation: `acedatacloud_single_wan_generate`.
+- Query an existing task: `acedatacloud_single_wan_task`, with `task_id` and optional `wait_seconds` (0–60). Pending/preview media is not final success.
+- The unmerged candidate's old `acedata_` names are removed, without aliases.
+  Update saved prompts/tool selections; previously returned task IDs, if any,
+  remain usable with the same service's task tool.
+- Source variants use `acedatacloud_single_` tool names and
+  `acedatacloud-single-` toolsets, distinct from official media registrations.
+  If both are installed, enable only one integration per service to avoid
+  accidental duplicate paid calls. No profile preferences change automatically.
+- This variant registers no native image backend.
+
+## Canonical source and validation boundary
+
+Generated by [https://github.com/AceDataCloud/AceDataCloudMediaHermes](https://github.com/AceDataCloud/AceDataCloudMediaHermes) at `4ebf0fa803b92a1bc8b41fb4d4cd3ce3aacf06a7` using
+`scripts/export_service.py --service wan`. Transport and operation schemas
+have one maintained source; `source-lock.json` records exact file hashes and
+identity transformations. Consumer CI checks regenerated files against that
+immutable checkout. Submit runtime/schema fixes to the canonical repository,
+then deliberately regenerate; do not hand-edit downstream transport copies.
+
+Normal CI runs unittest discovery, the official Hermes 0.23.1 validator,
+normal exact-SHA Git installation, and fresh in-process/host profiles both alone
+and alongside official media 2.0.2. Valid transport requests are mocked; host
+dispatch uses invalid inputs. Green source CI does not prove a new paid request,
+unique billing, current GUI interaction, default installation or catalog admission.
+Original candidate specs and dated live evidence are preserved in `history/`.
+
+![Historical real official media catalog screenshot, captured 2026-10-18](https://github.com/AceDataCloud/AceDataCloudMediaHermes/raw/8eaebfb86152d754061375de881548bfa096dd2d/assets/tutorial/hermes-gpt-image-search.jpg)
+
+Historical **2026-10-18** screenshot of the official media **2.0.1** entry.
+It illustrates that shared catalog entry, not a search for this service, this
+source variant, a new paid result or a current GUI test.
