@@ -1,0 +1,14 @@
+{
+  "name": "acedatacloud-wan",
+  "version": "1.0.0",
+  "author": "AceDataCloud",
+  "description": "Wan by Ace Data Cloud: source-only single-service Git plugin. The primary operation spends paid Credits without a Hermes approval prompt; model options can increase cost. Prompts/reference URLs go to api.acedata.cloud. Never automatically retry a paid request.",
+  "requires_hermes": ">=0.23.1",
+  "provides_tools": [
+    "acedatacloud_single_wan_generate",
+    "acedatacloud_single_wan_task"
+  ],
+  "requires_env": [
+    "ACEDATACLOUD_API_KEY"
+  ]
+}
